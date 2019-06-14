@@ -8,27 +8,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import kotlin.collections.ArrayList
 
 /**
  * @PageageName : com.example.recyclerviewdragdismiss
  * @Author : hechao
  * @Date :   2019-06-13 19:39
  */
-class MyAdapter() : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
+class MultipleCategoryAdapter() : RecyclerView.Adapter<MultipleCategoryAdapter.MyViewHolder>() {
 
     private var mBrowserDatas = arrayListOf<String>()
-    private var mNearbyDatas = arrayListOf<String>()
 
     private var dragMoveCallback: DragMoveCallback? = null
 
     constructor(
         browserDatas: ArrayList<String>,
-        nearbyDatas: ArrayList<String>,
         dragMoveCallback: DragMoveCallback?
     ) : this() {
         this.mBrowserDatas = browserDatas
-        this.mNearbyDatas = nearbyDatas
         this.dragMoveCallback = dragMoveCallback
     }
 
@@ -40,66 +36,39 @@ class MyAdapter() : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, viewType: Int): MyViewHolder {
-        return if (viewType == ITEM_TYPE_BROWSER_TITLE) ItemTitleViewHolder(
-            LayoutInflater.from(p0.context).inflate(R.layout.item_title, p0, false),
-            dragMoveCallback
-        ) else ItemBrowserViewHolder(
-            LayoutInflater.from(p0.context).inflate(R.layout.item_browser_content, p0, false),
-            dragMoveCallback
-        )
-//        return when (viewType) {
-//            ITEM_TYPE_BROWSER_TITLE -> ItemTitleViewHolder(
-//                LayoutInflater.from(p0.context).inflate(R.layout.item_title, p0, false), dragMoveCallback
-//            )
-//            ITEM_TYPE_BROWSER_CONTENT -> ItemBrowserViewHolder(
-//                LayoutInflater.from(p0.context).inflate(R.layout.item_browser_content, p0, false), dragMoveCallback
-//            )
-//            ITEM_TYPE_NEARBY_TITLE -> ItemTitleViewHolder(
-//                LayoutInflater.from(p0.context).inflate(R.layout.item_title, p0, false), dragMoveCallback
-//            )
-//            ITEM_TYPE_NEARBY_CONTENT -> ItemNearByViewHolder(
-//                LayoutInflater.from(p0.context).inflate(
-//                    R.layout.item_nearby_content,
-//                    p0,
-//                    false
-//                ), dragMoveCallback
-//            )
-//            else -> ItemTitleViewHolder(
-//                LayoutInflater.from(p0.context).inflate(R.layout.item_title, p0, false), dragMoveCallback
-//            )
-//        }
+        return when (viewType) {
+            ITEM_TYPE_BROWSER_TITLE -> ItemTitleBrowserViewHolder(
+                LayoutInflater.from(p0.context).inflate(R.layout.item_title, p0, false)
+            )
+            else ->
+                ItemBrowserViewHolder(
+                    LayoutInflater.from(p0.context).inflate(R.layout.item_browser_content, p0, false), dragMoveCallback
+                )
+        }
     }
 
     override fun onBindViewHolder(p0: MyViewHolder, position: Int) {
-        if (p0 is ItemTitleViewHolder) {
-            p0.textView.text = "最近浏览"
-        } else if (p0 is ItemBrowserViewHolder) p0.textView.text = mBrowserDatas[position - 1]
-//            ITEM_TYPE_NEARBY_TITLE -> p0.textView.text = "附近秀场"
-//            ITEM_TYPE_NEARBY_CONTENT -> p0.textView.text = mNearbyDatas[position - mBrowserDatas.size - 2]
+        when (p0) {
+            is ItemTitleBrowserViewHolder -> p0.textView.text = "最近浏览"
+            else -> p0.textView.text = mBrowserDatas[position - 1]
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
         return if (position == 0)
             ITEM_TYPE_BROWSER_TITLE
         else ITEM_TYPE_BROWSER_CONTENT
-//        return if (position == 0)
-//            ITEM_TYPE_BROWSER_TITLE
-//        else if (position > 0 && position < mBrowserDatas.size + 1) {
-//            ITEM_TYPE_BROWSER_CONTENT
-//        } else if (position == mBrowserDatas.size + 1) {
-//            ITEM_TYPE_NEARBY_TITLE
-//        }
-//        else ITEM_TYPE_BROWSER_CONTENT
     }
 
     override fun getItemCount(): Int = mBrowserDatas.size + 1
 
     fun onItemMove(fromPosition: Int, toPosition: Int) {
-        val newFromPosition = fromPosition - 1
-        val newToPosition = toPosition - 1
-        val preItem = mBrowserDatas.removeAt(newFromPosition)
-        mBrowserDatas.add(if (newToPosition in 1 until newFromPosition) newToPosition - 1 else newToPosition, preItem)
-        notifyItemMoved(newFromPosition, newToPosition)
+        val preItem = mBrowserDatas.removeAt(fromPosition - 1)
+        mBrowserDatas.add(
+            toPosition - 1,
+            preItem
+        )
+        notifyItemMoved(fromPosition, toPosition)
     }
 
     fun onItemDismiss(position: Int) {
@@ -109,7 +78,10 @@ class MyAdapter() : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
         }
     }
 
-    open class ItemTitleViewHolder(view: View, dragMoveCallback: DragMoveCallback?) :
+    open class ItemTitleBrowserViewHolder(view: View) :
+        MyViewHolder(view, null)
+
+    open class ItemTitleNearbyViewHolder(view: View, dragMoveCallback: DragMoveCallback?) :
         MyViewHolder(view, dragMoveCallback)
 
     open class ItemBrowserViewHolder(view: View, dragMoveCallback: DragMoveCallback?) :
@@ -121,7 +93,7 @@ class MyAdapter() : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
     open class DingViewHolder(view: View, dragMoveCallback: DragMoveCallback?) : MyViewHolder(view, dragMoveCallback)
 
     open class MyViewHolder(view: View, dragMoveCallback: DragMoveCallback?) : RecyclerView.ViewHolder(view) {
-        open val textView: TextView = view.findViewById(R.id.textName)
+        open val textView: TextView = view.findViewById(R.id.textName) as TextView
         private val dragMoveCallback = dragMoveCallback
         private var mDX = 0f
         private var mDY = 0f

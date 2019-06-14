@@ -3,8 +3,6 @@ package com.example.recyclerviewdragdismiss
 import android.graphics.Canvas
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
-import android.util.Log
-import android.view.View
 
 /**
  * @PageageName : com.example.recyclerviewdragdismiss
@@ -14,12 +12,12 @@ import android.view.View
 class DragItemHelperCallback() : ItemTouchHelper.Callback() {
 
     private val TAG = DragItemHelperCallback::class.java.canonicalName
-    private var myAdapter: MyAdapter? = null
+    private var myAdapter: SingleCategoryAdapter? = null
     private var mAdapterSelectedPosition = -1
     private var mFingerUp = false
+    private var mSelected = false;
 
-
-    constructor(myAdapter: MyAdapter?) : this() {
+    constructor(myAdapter: SingleCategoryAdapter?) : this() {
         this.myAdapter = myAdapter
     }
 
@@ -30,29 +28,35 @@ class DragItemHelperCallback() : ItemTouchHelper.Callback() {
     }
 
     override fun onMove(p0: RecyclerView, p1: RecyclerView.ViewHolder, p2: RecyclerView.ViewHolder): Boolean {
-        myAdapter?.let {
-            it.onItemMove(p1.adapterPosition, p2.adapterPosition)
+        if (p1.itemViewType != p2.itemViewType) return false
+        if (p0.adapter is OnItemDragListener) {
+            val onItemDragListener = p0.adapter as OnItemDragListener
+            onItemDragListener.onItemMove(p1.adapterPosition, p2.adapterPosition)
         }
         return true
     }
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         mFingerUp = false
-        val myViewHolder = viewHolder as MyAdapter.MyViewHolder
-        myViewHolder.onItemClear(viewHolder.adapterPosition)
+        if (viewHolder is OnItemSelectedListener) {
+            val onItemSelectedListener = viewHolder as OnItemSelectedListener
+            onItemSelectedListener.onItemClear()
+        }
     }
 
     override fun onSwiped(p0: RecyclerView.ViewHolder, direction: Int) {
-        myAdapter?.let {
-            it.onItemDismiss(direction)
-        }
+//        myAdapter?.let {
+//            it.onItemDismiss(direction)
+//        }
     }
 
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
-            val myViewHolder = viewHolder as MyAdapter.MyViewHolder
-            mAdapterSelectedPosition = myViewHolder.adapterPosition
-            myViewHolder.onItemSelected(mAdapterSelectedPosition)
+            mSelected = true
+            if (viewHolder is OnItemSelectedListener) {
+                val onItemSelectedListener = viewHolder as OnItemSelectedListener
+                onItemSelectedListener.onItemSelected()
+            }
         }
     }
 
@@ -63,6 +67,7 @@ class DragItemHelperCallback() : ItemTouchHelper.Callback() {
         animateDy: Float
     ): Long {
         mFingerUp = true
+        mSelected = false
         return super.getAnimationDuration(recyclerView, animationType, animateDx, animateDy)
     }
 
@@ -75,9 +80,9 @@ class DragItemHelperCallback() : ItemTouchHelper.Callback() {
         actionState: Int,
         isCurrentlyActive: Boolean
     ) {
-        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-            val myViewHolder = viewHolder as MyAdapter.MyViewHolder
-            myViewHolder.onItemDragDistance(viewHolder, mFingerUp, dX, dY + myViewHolder.itemView.top)
+        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG && recyclerView.adapter is OnItemDragListener) {
+            val onItemDragListener = recyclerView.adapter as OnItemDragListener
+            onItemDragListener.onItemMoveDistance(viewHolder,dX, dY + viewHolder.itemView.top)
         }
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
     }
