@@ -1,4 +1,4 @@
-package com.example.recyclerviewdragdismiss
+package com.example.recyclerviewdragdismiss.listener
 
 /**
  * @PageageName : com.example.recyclerviewdragdismiss

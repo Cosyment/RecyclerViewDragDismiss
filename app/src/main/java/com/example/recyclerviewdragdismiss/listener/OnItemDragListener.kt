@@ -1,4 +1,4 @@
-package com.example.recyclerviewdragdismiss
+package com.example.recyclerviewdragdismiss.listener
 
 import android.support.v7.widget.RecyclerView
 
@@ -14,5 +14,5 @@ interface OnItemDragListener {
      */
     fun onItemMove(fromPosition: Int, toPosition: Int)
 
-    fun onItemMoveDistance(viewHolder: RecyclerView.ViewHolder,dX: Float, dY: Float)
+    fun onItemMoveDistance(viewHolder: RecyclerView.ViewHolder, freed: Boolean, dX: Float, dY: Float)
 }

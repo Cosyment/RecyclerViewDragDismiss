@@ -1,4 +1,4 @@
-package com.example.recyclerviewdragdismiss
+package com.example.recyclerviewdragdismiss.adapter
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
@@ -10,6 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.example.recyclerviewdragdismiss.R
+import com.example.recyclerviewdragdismiss.listener.OnItemDragListener
+import com.example.recyclerviewdragdismiss.listener.OnItemSelectedListener
 
 /**
  * @PageageName : com.example.recyclerviewdragdismiss
@@ -17,7 +20,8 @@ import android.widget.TextView
  * @Date :   2019-06-13 19:39
  */
 open class SingleCategoryAdapter() :
-    RecyclerView.Adapter<SingleCategoryAdapter.MyViewHolder>(), OnItemDragListener {
+    RecyclerView.Adapter<SingleCategoryAdapter.MyViewHolder>(),
+    OnItemDragListener {
 
     private var mBrowserDatas = arrayListOf<String>()
 
@@ -32,14 +36,6 @@ open class SingleCategoryAdapter() :
         this.itemTouchHelper = itemTouchHelper
     }
 
-//    constructor(
-//        browserDatas: ArrayList<String>,
-//        dragMoveCallback: DragMoveCallback?
-//    ) : this() {
-//        this.mBrowserDatas = browserDatas
-//        this.dragMoveCallback = dragMoveCallback
-//    }
-
     companion object {
         const val ITEM_TYPE_BROWSER_TITLE = 0
         const val ITEM_TYPE_BROWSER_CONTENT = 1
@@ -48,11 +44,19 @@ open class SingleCategoryAdapter() :
     override fun onCreateViewHolder(p0: ViewGroup, viewType: Int): MyViewHolder {
         return when (viewType) {
             ITEM_TYPE_BROWSER_TITLE -> ItemTitleBrowserViewHolder(
-                LayoutInflater.from(p0.context).inflate(R.layout.item_title, p0, false)
+                LayoutInflater.from(p0.context).inflate(
+                    R.layout.item_title,
+                    p0,
+                    false
+                )
             )
             else ->
                 ItemBrowserViewHolder(
-                    LayoutInflater.from(p0.context).inflate(R.layout.item_browser_content, p0, false),
+                    LayoutInflater.from(p0.context).inflate(
+                        R.layout.item_browser_content,
+                        p0,
+                        false
+                    ),
                     onItemDragCallback
                 )
         }
@@ -90,8 +94,8 @@ open class SingleCategoryAdapter() :
         notifyItemMoved(fromPosition, toPosition)
     }
 
-    override fun onItemMoveDistance(viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float) {
-        onItemDragCallback?.onItemMoveDistance(viewHolder, dX, dY)
+    override fun onItemMoveDistance(viewHolder: RecyclerView.ViewHolder, freed: Boolean, dX: Float, dY: Float) {
+        onItemDragCallback?.onItemMoveDistance(viewHolder, freed, dX, dY)
     }
 
     open class ItemTitleBrowserViewHolder(view: View) :
@@ -138,12 +142,6 @@ open class SingleCategoryAdapter() :
 
     interface OnItemDragCallback {
         fun onItemSelected(viewHolder: RecyclerView.ViewHolder, selected: Boolean)
-        fun onItemMoveDistance(viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float)
+        fun onItemMoveDistance(viewHolder: RecyclerView.ViewHolder, freed: Boolean, dX: Float, dY: Float)
     }
-
-//    interface DragMoveCallback {
-//        fun onItemSelected(position: Int)
-//        fun onItemDragDistance(viewHolder: RecyclerView.ViewHolder, fingerUp: Boolean, dX: Float, dY: Float)
-//        fun onItemClear(position: Int, dX: Float, dY: Float)
-//    }
 }
